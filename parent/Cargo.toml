@@ -1,0 +1,10 @@
+[package]
+name = "parent"
+version = "0.1.0"
+authors = ["Tsvetelin Kostadinov <tsvetelinkostadinovts@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_closure = "0.3.2"
