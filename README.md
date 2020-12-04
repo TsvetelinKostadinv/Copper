@@ -27,4 +27,7 @@ There should be a configuration file in the root directory which serves as the c
 1. A distributed database hidden behind a single endpoint and can be quarried. **TO BE THOUGHT ABOUT**
 
 ## Resources
-1. https://docs.rs/serde_closure/0.3.2/serde_closure/
+1. https://crates.io/crates/bincode
+1. https://serde.rs/
+  1. https://docs.rs/serde_closure/0.3.2/serde_closure/
+  1. https://crates.io/crates/serde_traitobject
