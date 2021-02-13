@@ -15,7 +15,7 @@ _________
 
 fn main() {
     print_ascii_art();
-    
+
     println!("Hello, welcome to copper!");
     println!("What mode shall we start?: ");
     println!("[P]arent mode (server)");
@@ -24,9 +24,13 @@ fn main() {
     let mut choice = String::new();
     let mut chosen = false;
     while !chosen {
-        let _ = stdin()
+        choice.clear();
+        let read = stdin()
             .read_line(&mut choice)
             .expect("Failed to read choice from stdin!");
+        if read == 0 {
+            continue;
+        }
         chosen = match choice.trim() {
             "parent" | "p" | "Parent" | "P" => {
                 parent::main();
@@ -35,10 +39,8 @@ fn main() {
             "child" | "c" | "Child" | "C" => {
                 child::main();
                 true
-            },
-            "exit" | "e" | "Exit" | "E" => {
-                true
-            },
+            }
+            "exit" | "e" | "Exit" | "E" => true,
             _ => {
                 println!(
                     r#"Didn't get that
@@ -50,4 +52,5 @@ fn main() {
             }
         }
     }
+    println!("Done the work, exited.");
 }

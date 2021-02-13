@@ -1,11 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_traitobject as s;
 
-trait Executable<Args: s::Serialize + s::Deserialize, Res: s::Serialize + s::Deserialize>:
-    s::Serialize + s::Deserialize
-{
-    fn exec(&self, args: Args) -> Res;
-}
+use copper::util::{Executable, serialize, deserialize};
 
 #[derive(Serialize, Deserialize)]
 struct Printer;
@@ -17,7 +13,7 @@ impl Executable<(), ()> for Printer {
 }
 
 #[test]
-fn executable_after_serialization() {
+fn executable_after_serialization_manual() {
     let printer = Printer;
 
     let erased: s::Box<dyn s::Any> = s::Box::new(printer);
@@ -42,7 +38,7 @@ impl Executable<(i32, i32), i32> for Incrementer {
 }
 
 #[test]
-fn executable_after_serialization_with_args() {
+fn executable_after_serialization_with_args_manual() {
     let incrementer = Incrementer;
 
     let erased: s::Box<dyn s::Any> = s::Box::new(incrementer);
@@ -55,4 +51,22 @@ fn executable_after_serialization_with_args() {
         Box::<dyn std::any::Any>::downcast(deserialized.into_any()).expect("Unable to downcast");
 
     assert_eq!(Incrementer.exec((3, 5)), (&downcast).exec((3, 5)));
+}
+
+#[test]
+fn executable_after_serialization_no_args_auto()
+{
+    let func = Printer;
+    let serialized = serialize(func);
+    let deserialized: Box<Printer> = deserialize(serialized);
+    deserialized.exec(());
+}
+
+#[test]
+fn executable_after_serialization_with_args_auto()
+{
+    let func = Incrementer;
+    let serialized = serialize(func);
+    let deserialized: Box<Incrementer> = deserialize(serialized);
+    deserialized.exec((1,2));
 }

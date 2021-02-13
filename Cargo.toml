@@ -11,5 +11,6 @@ serde = "1.0.117"
 serde_json = "1.0.60"
 serde_closure = "0.3.2"
 serde_traitobject = "0.2.7"
+
 parent = { path = "./parent"}
 child = { path = "./child"}

@@ -1,4 +1,4 @@
 pub fn main()
 {
-    println!("You have started a child node!");
+    println!("You have started a parent node!");
 }
