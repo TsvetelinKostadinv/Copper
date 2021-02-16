@@ -1,10 +1,12 @@
+use serde::{Deserialize, Serialize};
 use std::net::TcpListener;
 use std::thread;
+use std::io::{Write, Read};
 
 const PORT: usize = 8080;
 const LOCALHOST: &'static str = "127.0.0.1";
 
-const MAX_MESSAGE_SIZE: usize = 4096;
+const MAX_MESSAGE_SIZE: usize = 4 * 1024;
 
 pub fn main() {
     println!("You have started a server node!");
@@ -38,6 +40,12 @@ fn next_port(port: usize) -> usize {
     port + 1
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Message<'a> {
+    msg: &'a str,
+    num: usize,
+}
+
 fn run_server(conn: TcpListener) {
     println!(
         "Copper server node started on {}",
@@ -49,25 +57,35 @@ fn run_server(conn: TcpListener) {
     let mut clients = Vec::new();
 
     for stream in conn.incoming() {
-        if let Ok(socket) = stream {
-            println!("Client connected: {}", socket.local_addr().unwrap());
+        if let Ok(mut socket) = stream {
+            println!("Client connected: {}", socket.peer_addr().unwrap());
             clients.push(socket.try_clone().expect("Could not clone client socket"));
 
             thread::spawn(move || loop {
                 // TODO implement client structs and set the "should check" flag to false
+                // if(socket.)
                 let mut buf = [0; MAX_MESSAGE_SIZE];
-                let _ = socket.peek(&mut buf);
-                let msg = std::str::from_utf8(&buf).expect("Could not parse utf8 message");
-                match serde_json::from_str::<String>(msg) {
-                    Ok(_) => 
-                    {
-                        println!("Received a message from the client at {}", socket.local_addr().unwrap());
-                        todo!()
-                    },
-                    Err(_) => todo!(),
+                let _ = socket.peek(&mut buf).expect("Cannot peek in the buffer");
+                let mut msg = buf.to_vec();
+
+                msg.retain(|&el| el != 0);
+                let msg = std::str::from_utf8(&msg).expect("Could not parse uft8 string");
+
+                // println!("Received: |{:?}|", msg);
+                match serde_json::from_str::<Message>(msg) {
+                    Ok(msg) => {
+                        println!(
+                            "Received a message from the client at {}",
+                            socket.peer_addr().unwrap()
+                        );
+                        println!("{} : {:?}", socket.peer_addr().unwrap(), msg);
+                        let _ = socket.read_exact(&mut buf);
+                    }
+                    Err(err) => {
+                        continue;
+                    }
                 }
             });
-
         }
     }
 }
