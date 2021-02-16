@@ -61,7 +61,7 @@ fn run_server(conn: TcpListener) {
                 match serde_json::from_str::<String>(msg) {
                     Ok(_) => 
                     {
-                        println!("Received a message from the client at {}", socket.local_addr().unwrap())
+                        println!("Received a message from the client at {}", socket.local_addr().unwrap());
                         todo!()
                     },
                     Err(_) => todo!(),
