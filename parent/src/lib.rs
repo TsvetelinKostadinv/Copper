@@ -81,7 +81,7 @@ fn run_server(conn: TcpListener) {
                         println!("{} : {:?}", socket.peer_addr().unwrap(), msg);
                         let _ = socket.read_exact(&mut buf);
                     }
-                    Err(err) => {
+                    Err(_) => {
                         continue;
                     }
                 }

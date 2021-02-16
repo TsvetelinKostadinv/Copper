@@ -1,6 +1,7 @@
 # Copper
 Cuz it does not Rust \
-See what I did there 😄😄
+See what I did there 😄😄\
+[![Build Status](https://travis-ci.com/TsvetelinKostadinv/Copper.svg?branch=master)](https://travis-ci.com/TsvetelinKostadinv/Copper)
 
 ## Synopsis
 The aim is to develop the infrastructure for `distributed computing` with Rust so a heavy task can be split between multiple computers.
