@@ -1,5 +1,9 @@
 use std::io::stdin;
 
+mod server;
+mod client;
+mod common;
+
 fn print_ascii_art() {
     println!(
         r#"
@@ -18,7 +22,7 @@ fn main() {
 
     println!("Hello, welcome to copper!");
     println!("What mode shall we start?: ");
-    println!("[P]arent mode (server)");
+    println!("[S]erver mode (server)");
     println!("[C]hild mode (node)");
     println!("[E]xit");
     let mut choice = String::new();
@@ -32,12 +36,12 @@ fn main() {
             continue;
         }
         chosen = match choice.trim() {
-            "parent" | "p" | "Parent" | "P" => {
-                parent::main();
+            "server" | "s" | "Server" | "S" => {
+                server::main();
                 true
             }
             "child" | "c" | "Child" | "C" => {
-                child::main();
+                client::main();
                 true
             }
             "exit" | "e" | "Exit" | "E" => true,
