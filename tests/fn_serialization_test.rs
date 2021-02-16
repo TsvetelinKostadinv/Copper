@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_traitobject as s;
 
-use copper::util::{Executable, serialize, deserialize};
+use copper::util::{deserialize, serialize, Executable};
 
 #[derive(Serialize, Deserialize)]
 struct Printer;
@@ -54,8 +54,7 @@ fn executable_after_serialization_with_args_manual() {
 }
 
 #[test]
-fn executable_after_serialization_no_args_auto()
-{
+fn executable_after_serialization_no_args_auto() {
     let func = Printer;
     let serialized = serialize(func);
     let deserialized: Box<Printer> = deserialize(serialized);
@@ -63,10 +62,9 @@ fn executable_after_serialization_no_args_auto()
 }
 
 #[test]
-fn executable_after_serialization_with_args_auto()
-{
+fn executable_after_serialization_with_args_auto() {
     let func = Incrementer;
     let serialized = serialize(func);
     let deserialized: Box<Incrementer> = deserialize(serialized);
-    deserialized.exec((1,2));
+    assert_eq!(deserialized.exec((1, 2)), 3);
 }

@@ -205,7 +205,10 @@ dependencies = [
 name = "parent"
 version = "0.1.0"
 dependencies = [
+ "serde",
  "serde_closure",
+ "serde_json",
+ "serde_traitobject",
 ]
 
 [[package]]
