@@ -1,11 +1,10 @@
-use serde::{Deserialize, Serialize};
-use std::env;
+use std::io::stdin;
 use std::io::{Read, Write};
 use std::net::{Shutdown, TcpStream};
 
-use crate::common::{deserialize, serialize, Dummy, Executable, Msg, Type};
+use crate::common::{deserialize, serialize, Dummy, Msg, Type};
 
-const INTER_FLAG: &'static str = "-i";
+// const INTER_FLAG: &'static str = "-i";
 
 const PORT: usize = 8080;
 const LOCALHOST: &'static str = "127.0.0.1";
@@ -14,28 +13,45 @@ const MAX_MESSAGE_SIZE: usize = 4 * 1024;
 
 pub fn main() {
     println!("You have started a child node!");
-    let mut args: Vec<String> = env::args().collect();
-    args.reverse();
-    let _callsite = args.pop();
-    match args.pop() {
-        Some(command) => {
-            if command == INTER_FLAG {
-                interactive_session()
-            }
+    println!("On what IP would you like to connect");
+    let mut choice = String::new();
+    let _ = stdin()
+        .read_line(&mut choice)
+        .expect("Failed to read choice from stdin!");
+    let mut host;
+    let mut port = PORT;
+    match choice.as_str().trim() {
+        "" => host = LOCALHOST,
+        _ => {
+            host = choice.trim();
         }
-        None => automatic_session(),
     }
+    let mut str_port = String::new();
+    let mut done = false;
+    while !done {
+        str_port.clear();
+        println!("Input port to connect to:");
+        let _ = stdin()
+            .read_line(&mut str_port)
+            .expect("Failed to read choice from stdin!");
+        println!("For the port read: {}", str_port);
+        match str_port.trim().parse::<usize>() {
+            Ok(input) => {
+                port = input;
+                done = true;
+            }
+            _ => {}
+        };
+    }
+
+    automatic_session(host, port);
 }
 
-fn automatic_session() {
-    println!(
-        "Copper Child node started in automatic mode (for interactive mode supply flag \"-i\")"
-    );
-    let mut port = PORT;
-    let host_addr = LOCALHOST;
+fn automatic_session(host: &str, mut port: usize) {
+    println!("Copper Child node started in automatic mode");
     let mut bound = false;
     while !bound {
-        let addr = format!("{}:{}", host_addr, port);
+        let addr = format!("{}:{}", host, port);
         let stream = TcpStream::connect(addr);
         match stream {
             Ok(conn) => {
@@ -61,8 +77,6 @@ fn next_port(port: usize) -> usize {
 
 fn run_client(mut conn: TcpStream) {
     println!("Child node connected to {}", conn.peer_addr().unwrap());
-
-    // conn.write("Hello from client".as_bytes()).expect("Could not write to the server");
 
     let handle = std::thread::spawn(move || {
         let mut buf = [0; MAX_MESSAGE_SIZE];
@@ -110,5 +124,3 @@ fn run_client(mut conn: TcpStream) {
 
     let _ = handle.join();
 }
-
-fn interactive_session() {}

@@ -1,20 +1,12 @@
-use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
-
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
-
-use std::thread::JoinHandle;
+use serde::{Deserialize, Serialize};
 
 use std::time::Duration;
 
-use serde::{Deserialize, Serialize};
-
-use crate::common::{deserialize, serialize, Dummy, Executable, Msg, Type};
+use crate::common::Executable;
 
 mod structs;
 
-const MAX_MESSAGE_SIZE: usize = 4 * 1024;
+const PORT: usize = 8080;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Task;
@@ -42,7 +34,7 @@ impl Executable<Vec<String>, String> for Aggregator {
 
 pub fn main() {
     println!("You have started a server node!");
-    let mut server = structs::Server::new::<Task, Aggregator>(8080, Box::new(Task), Box::new(Aggregator));
+    let mut server = structs::Server::new::<Task, Aggregator>(PORT, Box::new(Task), Box::new(Aggregator));
     while server.repl() {}
 
     println!("Server exited!");

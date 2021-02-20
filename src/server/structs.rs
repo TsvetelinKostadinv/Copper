@@ -1,22 +1,18 @@
 use std::io::{stdin, Read, Write};
-use std::net::{Shutdown, TcpListener, TcpStream};
+use std::net::{TcpListener, TcpStream};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use std::thread::JoinHandle;
 
-use std::time::Duration;
-
-use serde::{Deserialize, Serialize};
-
 use crate::common::{deserialize, serialize, Dummy, Executable, Msg, Type};
 
-const PORT: usize = 8080;
 const LOCALHOST: &'static str = "127.0.0.1";
 
 const MAX_MESSAGE_SIZE: usize = 4 * 1024;
 
+#[allow(dead_code)]
 pub struct Client {
     stream: Arc<TcpStream>,
     listening_thread_join_handle: JoinHandle<()>,
@@ -24,14 +20,14 @@ pub struct Client {
     active: Arc<AtomicBool>,
 }
 
+#[allow(dead_code)]
 pub struct Server {
     remote_exec_msg: Arc<Vec<u8>>,
-    listener: Arc<Mutex<TcpListener>>,
+    // listener: Arc<Mutex<TcpListener>>,
     clients: Arc<Mutex<Vec<Client>>>,
     aggregation_buffer: Arc<Mutex<Vec<String>>>,
-    accepting_thread_handle: Arc<JoinHandle<()>>,
+    // accepting_thread_handle: Option<JoinHandle<()>>,
     accepting: Arc<AtomicBool>,
-    calculating: Arc<AtomicBool>,
     aggregation_func: Box<dyn Executable<Vec<String>, String>>,
 }
 
@@ -105,7 +101,7 @@ impl Server {
                                 let mut buf = [0; MAX_MESSAGE_SIZE];
                                 let peek_res = stream_clone.peek(&mut buf); //.expect("Cannot peek in the buffer");
                                 match peek_res {
-                                    Err(err) => {
+                                    Err(_) => {
                                         println!("Error while peeking in buffer of client at {}, disconnecting them.", stream_clone.peer_addr().unwrap());
                                         active_clone.store(false, Ordering::Relaxed);
                                         break;
@@ -157,11 +153,7 @@ impl Server {
         })
     }
 
-    pub fn new<T, U>(
-        port: usize,
-        mut remote_exec_func: Box<T>,
-        mut aggregation_func: Box<U>,
-    ) -> Self
+    pub fn new<T, U>(port: usize, remote_exec_func: Box<T>, aggregation_func: Box<U>) -> Self
     where
         T: Executable<(), String> + 'static,
         U: Executable<Vec<String>, String> + 'static,
@@ -182,8 +174,8 @@ impl Server {
         let clients = Arc::new(Mutex::new(Vec::new()));
         let aggregation_buffer = Arc::new(Mutex::new(Vec::new()));
         let accepting = Arc::new(AtomicBool::new(true));
-        let calculating = Arc::new(AtomicBool::new(false));
-        let accepting_thread_handle = Arc::new(Server::open_accepting_thread(
+        /* let accepting_thread_handle =*/
+        Some(Server::open_accepting_thread(
             &listener,
             &accepting,
             &clients,
@@ -195,28 +187,23 @@ impl Server {
 
         Server {
             remote_exec_msg,
-            listener,
+            // listener,
             clients,
             aggregation_buffer,
-            accepting_thread_handle,
+            // accepting_thread_handle,
             accepting,
-            calculating,
             aggregation_func,
         }
     }
     pub fn shutdown(&mut self) {
         self.accepting.store(false, Ordering::Relaxed);
-        self.calculating.store(false, Ordering::Relaxed);
-        let clients = self
-            .clients
-            .lock()
-            .expect("Could not lock the join handles");
-        // let accepting_handle = self.accepting_thread_handle.clone();
-        // accepting_handle.as_ref().join();
-        for client in clients.iter() {
-            // client.terminate_connection();
-        }
-        // (*self.listener.lock().expect("Could not lock TCP listener!")).shutdown(Shutdown::Both).expect();
+        // match &self.accepting_thread_handle {
+        //     Some(handle) => {
+        //         handle.join();
+        //     }
+        //     None => {}
+        // };
+        // self.accepting_thread_handle.join();
     }
 
     pub fn list_clients(&self) {
@@ -279,7 +266,7 @@ impl Server {
         self.print_help();
         let mut choice = String::new();
         choice.clear();
-        let read = stdin()
+        let _ = stdin()
             .read_line(&mut choice)
             .expect("Failed to read choice from stdin!");
         match choice.trim() {
@@ -300,7 +287,7 @@ impl Server {
             }
             _ => println!("Unrecognised command, try \"help\" for more information"),
         }
-        self.accepting.load(Ordering::Relaxed) || self.calculating.load(Ordering::Relaxed)
+        self.accepting.load(Ordering::Relaxed)
     }
 }
 
