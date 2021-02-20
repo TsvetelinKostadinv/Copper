@@ -29,6 +29,15 @@ pub struct Msg {
     pub func: Box<dyn Executable<(), String>>,
 }
 
+#[derive(Serialize, Deserialize, Copy, Clone)]
+pub struct Dummy;
+
+impl Executable<(), String> for Dummy {
+    fn exec(&self, _: ()) -> String {
+        String::new()
+    }
+}
+
 pub fn serialize(func: Msg) -> String
 {
     let erased: serde_traitobject::Box<dyn serde_traitobject::Any> =

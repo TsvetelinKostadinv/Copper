@@ -3,7 +3,7 @@ use std::env;
 use std::io::{Read, Write};
 use std::net::{Shutdown, TcpStream};
 
-use crate::common::{deserialize, serialize, Executable, Msg, Type};
+use crate::common::{deserialize, serialize, Dummy, Executable, Msg, Type};
 
 const INTER_FLAG: &'static str = "-i";
 
@@ -59,17 +59,10 @@ fn next_port(port: usize) -> usize {
     port + 1
 }
 
-#[derive(Serialize, Deserialize)]
-struct Dummy;
-
-impl Executable<(), String> for Dummy {
-    fn exec(&self, _: ()) -> String {
-        String::new()
-    }
-}
-
 fn run_client(mut conn: TcpStream) {
     println!("Child node connected to {}", conn.peer_addr().unwrap());
+
+    // conn.write("Hello from client".as_bytes()).expect("Could not write to the server");
 
     let handle = std::thread::spawn(move || {
         let mut buf = [0; MAX_MESSAGE_SIZE];
@@ -87,11 +80,10 @@ fn run_client(mut conn: TcpStream) {
             .read(&mut buf)
             .expect("Could not read the peeked bytes!");
 
-        let dummy = Dummy;
         let end_msg = Msg {
             type_msg: Type::Result,
             res,
-            func: Box::new(dummy),
+            func: Box::new(Dummy),
         };
 
         conn.write(serialize(end_msg).as_bytes())
@@ -107,8 +99,6 @@ fn run_client(mut conn: TcpStream) {
             msg.retain(|&el| el != 0);
             let msg = std::str::from_utf8(&msg).expect("Could not parse uft8 string");
             let end_msg = deserialize(msg.into());
-            println!("waiting!");
-            println!("msg_type: {:?}", end_msg.type_msg);
             if end_msg.type_msg == Type::ThankYou {
                 break;
             }
