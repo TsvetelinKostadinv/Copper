@@ -18,14 +18,11 @@ pub fn main() {
     let _ = stdin()
         .read_line(&mut choice)
         .expect("Failed to read choice from stdin!");
-    let mut host;
+    let host = match choice.as_str().trim() {
+        "" => LOCALHOST,
+        _ => choice.trim(),
+    };
     let mut port = PORT;
-    match choice.as_str().trim() {
-        "" => host = LOCALHOST,
-        _ => {
-            host = choice.trim();
-        }
-    }
     let mut str_port = String::new();
     let mut done = false;
     while !done {

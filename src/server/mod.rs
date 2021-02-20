@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use crate::common::Executable;
 
-mod structs;
+mod util;
 
 const PORT: usize = 8080;
 
@@ -34,7 +34,7 @@ impl Executable<Vec<String>, String> for Aggregator {
 
 pub fn main() {
     println!("You have started a server node!");
-    let mut server = structs::Server::new::<Task, Aggregator>(PORT, Box::new(Task), Box::new(Aggregator));
+    let mut server = util::Server::new::<Task, Aggregator>(PORT, Box::new(Task), Box::new(Aggregator));
     while server.repl() {}
 
     println!("Server exited!");
