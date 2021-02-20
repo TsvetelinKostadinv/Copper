@@ -31,7 +31,6 @@ pub fn main() {
         let _ = stdin()
             .read_line(&mut str_port)
             .expect("Failed to read choice from stdin!");
-        println!("For the port read: {}", str_port);
         match str_port.trim().parse::<usize>() {
             Ok(input) => {
                 port = input;
