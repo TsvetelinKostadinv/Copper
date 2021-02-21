@@ -1,6 +1,7 @@
 use std::io::stdin;
 use std::io::{Read, Write};
 use std::net::{Shutdown, TcpStream};
+use std::num::ParseIntError;
 
 use crate::common::{deserialize, serialize, Dummy, Msg, Type};
 
@@ -31,19 +32,24 @@ pub fn main() {
         let _ = stdin()
             .read_line(&mut str_port)
             .expect("Failed to read choice from stdin!");
+        #[allow(non_snake_case)]
+        #[allow(unused_variables)]
         match str_port.trim().parse::<usize>() {
             Ok(input) => {
                 port = input;
                 done = true;
             }
-            _ => {}
+            Err(ParseIntError { .. }) => {
+                port = PORT;
+                done = true;
+            }
         };
     }
 
     automatic_session(host, port);
 }
 
-fn automatic_session(host: &str, mut port: usize) {
+pub fn automatic_session(host: &str, mut port: usize) {
     println!("Copper Child node started in automatic mode");
     let mut bound = false;
     while !bound {

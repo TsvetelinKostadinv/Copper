@@ -23,7 +23,7 @@ pub struct Client {
 #[allow(dead_code)]
 pub struct Server {
     remote_exec_msg: Arc<Vec<u8>>,
-    // listener: Arc<Mutex<TcpListener>>,
+    listener: Arc<Mutex<TcpListener>>,
     clients: Arc<Mutex<Vec<Client>>>,
     aggregation_buffer: Arc<Mutex<Vec<String>>>,
     // accepting_thread_handle: Option<JoinHandle<()>>,
@@ -100,9 +100,11 @@ impl Server {
                             while clone.load(Ordering::Relaxed) {
                                 let mut buf = [0; MAX_MESSAGE_SIZE];
                                 let peek_res = stream_clone.peek(&mut buf); //.expect("Cannot peek in the buffer");
+                                #[allow(non_snake_case)]
+                                #[allow(unused_variables)]
                                 match peek_res {
-                                    Err(_) => {
-                                        println!("Error while peeking in buffer of client at {}, disconnecting them.", stream_clone.peer_addr().unwrap());
+                                    Err(err) => {
+                                        println!("The client at {} disconnected or the host OS terminated the connection.", stream_clone.peer_addr().unwrap());
                                         active_clone.store(false, Ordering::Relaxed);
                                         break;
                                     }
@@ -187,7 +189,7 @@ impl Server {
 
         Server {
             remote_exec_msg,
-            // listener,
+            listener,
             clients,
             aggregation_buffer,
             // accepting_thread_handle,
@@ -195,6 +197,7 @@ impl Server {
             aggregation_func,
         }
     }
+
     pub fn shutdown(&mut self) {
         self.accepting.store(false, Ordering::Relaxed);
         // match &self.accepting_thread_handle {

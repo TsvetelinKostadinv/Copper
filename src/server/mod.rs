@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::common::Executable;
 
-mod util;
+pub mod util;
 
 const PORT: usize = 8080;
 
@@ -25,10 +25,9 @@ impl Executable<(), String> for Task {
         for _ in 0..SAMPLE_SIZE {
             sum += (rng.gen::<u8>() % 2) as usize;
         }
-        if sum < SAMPLE_SIZE/2 as usize
-        {
+        if sum < SAMPLE_SIZE / 2 as usize {
             String::from("0")
-        }else{
+        } else {
             String::from("1")
         }
     }
@@ -42,21 +41,17 @@ impl Executable<Vec<String>, String> for Aggregator {
         println!("I am aggregating!");
         let mut ones: usize = 0;
         for res in args.iter() {
-            ones += match res.as_str()
-            {
+            ones += match res.as_str() {
                 "0" => 0,
                 "1" => 1,
                 _ => unreachable!(),
             }
         }
-        if ones > args.len() /2 as usize
-        {
+        if ones > args.len() / 2 as usize {
             "The ones are more".into()
-        }else{
-            
+        } else {
             "The zeroes are more".into()
         }
-        
     }
 }
 
